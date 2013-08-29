@@ -7,14 +7,14 @@
   <parent>
     <groupId>com.github.jameswald.pagerslidingtabstrip</groupId>
     <artifactId>parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <name>PagerSlidingTabStrip</name>
   <artifactId>library</artifactId>
   <packaging>apklib</packaging>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
