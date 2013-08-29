@@ -1,5 +1,6 @@
 package com.astuetz.viewpager.extensions.sample;
 
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,11 +13,13 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.TextView;
 
 import com.astuetz.viewpager.extensions.PagerSlidingTabStrip;
-import com.astuetz.viewpager.extensions.PagerSlidingTabStrip.IconTabProvider;
+import com.astuetz.viewpager.extensions.Tab;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class QuickContactFragment extends DialogFragment {
 
@@ -25,17 +28,11 @@ public class QuickContactFragment extends DialogFragment {
 	private ContactPagerAdapter adapter;
 
 	public static QuickContactFragment newInstance() {
-		QuickContactFragment f = new QuickContactFragment();
-		return f;
+		return new QuickContactFragment();
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-		if (getDialog() != null) {
-			getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-			getDialog().getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-		}
 
 		View root = inflater.inflate(R.layout.fragment_quick_contact, container, false);
 
@@ -50,7 +47,6 @@ public class QuickContactFragment extends DialogFragment {
 		return root;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void onStart() {
 		super.onStart();
@@ -58,7 +54,7 @@ public class QuickContactFragment extends DialogFragment {
 		// change dialog width
 		if (getDialog() != null) {
 
-			int fullWidth = getDialog().getWindow().getAttributes().width;
+			final int fullWidth;
 
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
 				Display display = getActivity().getWindowManager().getDefaultDisplay();
@@ -80,26 +76,32 @@ public class QuickContactFragment extends DialogFragment {
 		}
 	}
 
-	public class ContactPagerAdapter extends PagerAdapter implements IconTabProvider {
+	private class ContactPagerAdapter extends PagerAdapter implements PagerSlidingTabStrip.TabProvider {
 
-		private final int[] ICONS = { R.drawable.ic_launcher_gplus, R.drawable.ic_launcher_gmail,
-				R.drawable.ic_launcher_gmaps, R.drawable.ic_launcher_chrome };
+		private final List<Tab> tabs;
 
 		public ContactPagerAdapter() {
 			super();
+
+      final Resources res = getResources();
+      tabs = Arrays.asList(
+          Tab.from(res.getDrawable(R.drawable.ic_launcher_gplus)),
+          Tab.from(res.getDrawable(R.drawable.ic_launcher_gmail)),
+          Tab.from(res.getDrawable(R.drawable.ic_launcher_gmaps)),
+          Tab.from(res.getDrawable(R.drawable.ic_launcher_chrome)));
 		}
 
 		@Override
 		public int getCount() {
-			return ICONS.length;
+			return tabs.size();
 		}
 
-		@Override
-		public int getPageIconResId(int position) {
-			return ICONS[position];
-		}
+    @Override
+    public Tab getTabForPosition(int position) {
+      return tabs.get(position);
+    }
 
-		@Override
+    @Override
 		public Object instantiateItem(ViewGroup container, int position) {
 			// looks a little bit messy here
 			TextView v = new TextView(getActivity());
@@ -120,9 +122,7 @@ public class QuickContactFragment extends DialogFragment {
 
 		@Override
 		public boolean isViewFromObject(View v, Object o) {
-			return v == ((View) o);
+			return v == o;
 		}
-
 	}
-
 }

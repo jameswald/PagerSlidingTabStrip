@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" >
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <ImageView
         android:id="@+id/image"
@@ -15,7 +15,6 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/image"
         android:background="#77000000"
         android:paddingBottom="14dip"
         android:paddingLeft="8dip"
@@ -28,7 +27,6 @@
         android:id="@+id/tabs"
         android:layout_width="match_parent"
         android:layout_height="62dip"
-        android:layout_below="@+id/image"
         android:background="@drawable/background_tabs_diagonal"
         app:dividerColor="#00000000"
         app:indicatorColor="#FF33B5E6"
@@ -38,7 +36,7 @@
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
-        android:layout_height="96dip"
-        android:layout_below="@+id/tabs" />
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
-</RelativeLayout>
+</LinearLayout>

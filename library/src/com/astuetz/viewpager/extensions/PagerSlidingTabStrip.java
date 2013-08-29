@@ -25,9 +25,11 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.AttributeSet;
@@ -43,11 +45,11 @@ import android.widget.TextView;
 
 public class PagerSlidingTabStrip extends HorizontalScrollView {
 
-	public interface IconTabProvider {
-		public int getPageIconResId(int position);
-	}
+  public interface TabProvider {
+    public Tab getTabForPosition(int position);
+  }
 
-	// @formatter:off
+  // @formatter:off
 	private static final int[] ATTRS = new int[] {
 		android.R.attr.textSize,
 		android.R.attr.textColor
@@ -173,12 +175,15 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
 	public void setViewPager(ViewPager pager) {
 		this.pager = pager;
 
-		if (pager.getAdapter() == null) {
-			throw new IllegalStateException("ViewPager does not have adapter instance.");
+    final PagerAdapter adapter = pager.getAdapter();
+		if (adapter == null) {
+			throw new IllegalStateException("The ViewPager must have an Adapter.");
 		}
+    if (!(adapter instanceof TabProvider)) {
+      throw new IllegalStateException("The ViewPager's Adapter must implement TabProvider.");
+    }
 
 		pager.setOnPageChangeListener(pageListener);
-
 		notifyDataSetChanged();
 	}
 
@@ -187,19 +192,20 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
 	}
 
 	public void notifyDataSetChanged() {
-
 		tabsContainer.removeAllViews();
-
 		tabCount = pager.getAdapter().getCount();
 
+    final TabProvider provider = (TabProvider) pager.getAdapter();
 		for (int i = 0; i < tabCount; i++) {
-
-			if (pager.getAdapter() instanceof IconTabProvider) {
-				addIconTab(i, ((IconTabProvider) pager.getAdapter()).getPageIconResId(i));
-			} else {
-				addTextTab(i, pager.getAdapter().getPageTitle(i).toString());
-			}
-
+      final int position = i;
+      final View view = getView(provider.getTabForPosition(position));
+      view.setOnClickListener(new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          pager.setCurrentItem(position);
+        }
+      });
+      tabsContainer.addView(view);
 		}
 
 		updateTabStyles();
@@ -226,40 +232,34 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
 
 	}
 
-	private void addTextTab(final int position, String title) {
+  private View getView(final Tab tab) {
+    final int type = tab.getType();
+    switch (tab.getType()) {
+      case Tab.TYPE_DRAWABLE:
+        return getView(tab.getDrawable());
+      case Tab.TYPE_TITLE:
+        return getView(tab.getTitle());
+      case Tab.TYPE_VIEW:
+        return tab.getView();
+      default:
+        throw new IllegalStateException(String.format(Locale.US, "Cannot get view for tab type(%s)", type));
+    }
+  }
 
-		TextView tab = new TextView(getContext());
-		tab.setText(title);
-		tab.setFocusable(true);
-		tab.setGravity(Gravity.CENTER);
-		tab.setSingleLine();
-
-		tab.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				pager.setCurrentItem(position);
-			}
-		});
-
-		tabsContainer.addView(tab);
-
+	private View getView(final CharSequence title) {
+		TextView view = new TextView(getContext());
+    view.setText(title);
+    view.setFocusable(true);
+    view.setGravity(Gravity.CENTER);
+    view.setSingleLine();
+    return view;
 	}
 
-	private void addIconTab(final int position, int resId) {
-
-		ImageButton tab = new ImageButton(getContext());
-		tab.setFocusable(true);
-		tab.setImageResource(resId);
-
-		tab.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				pager.setCurrentItem(position);
-			}
-		});
-
-		tabsContainer.addView(tab);
-
+	private View getView(final Drawable drawable) {
+		ImageButton view = new ImageButton(getContext());
+		view.setFocusable(true);
+		view.setImageDrawable(drawable);
+    return view;
 	}
 
 	private void updateTabStyles() {

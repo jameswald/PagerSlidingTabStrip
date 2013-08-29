@@ -30,11 +30,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.TypedValue;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.astuetz.viewpager.extensions.PagerSlidingTabStrip;
+import com.astuetz.viewpager.extensions.Tab;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends FragmentActivity {
 
@@ -65,27 +67,6 @@ public class MainActivity extends FragmentActivity {
 		tabs.setViewPager(pager);
 
 		changeColor(currentColor);
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-
-		switch (item.getItemId()) {
-
-		case R.id.action_contact:
-			QuickContactFragment dialog = new QuickContactFragment();
-			dialog.show(getSupportFragmentManager(), "QuickContactFragment");
-			return true;
-
-		}
-
-		return super.onOptionsItemSelected(item);
 	}
 
 	private void changeColor(int newColor) {
@@ -129,7 +110,6 @@ public class MainActivity extends FragmentActivity {
 			// http://stackoverflow.com/questions/11002691/actionbar-setbackgrounddrawable-nulling-background-from-thread-handler
 			getActionBar().setDisplayShowTitleEnabled(false);
 			getActionBar().setDisplayShowTitleEnabled(true);
-
 		}
 
 		currentColor = newColor;
@@ -173,30 +153,41 @@ public class MainActivity extends FragmentActivity {
 		}
 	};
 
-	public class MyPagerAdapter extends FragmentPagerAdapter {
+	public class MyPagerAdapter extends FragmentPagerAdapter implements PagerSlidingTabStrip.TabProvider {
 
-		private final String[] TITLES = { "Categories", "Home", "Top Paid", "Top Free", "Top Grossing", "Top New Paid",
-				"Top New Free", "Trending" };
+		private final List<Tab> tabs;
 
 		public MyPagerAdapter(FragmentManager fm) {
 			super(fm);
-		}
-
-		@Override
-		public CharSequence getPageTitle(int position) {
-			return TITLES[position];
+      tabs = Arrays.asList(
+          Tab.from("Categories"),
+          Tab.from("Home"),
+          Tab.from("Top Paid"),
+          Tab.from("Top Free"),
+          Tab.from("Top Grossing"),
+          Tab.from("Top New Paid"),
+          Tab.from("Top New Free"),
+          Tab.from("Trending"),
+          Tab.from(getResources().getDrawable(R.drawable.ic_action_user)));
 		}
 
 		@Override
 		public int getCount() {
-			return TITLES.length;
+			return tabs.size();
 		}
 
 		@Override
 		public Fragment getItem(int position) {
-			return SuperAwesomeCardFragment.newInstance(position);
+      if (position == tabs.size() - 1) {
+        return QuickContactFragment.newInstance();
+      } else {
+  			return SuperAwesomeCardFragment.newInstance(position);
+      }
 		}
 
-	}
-
+    @Override
+    public Tab getTabForPosition(int position) {
+      return tabs.get(position);
+    }
+  }
 }
